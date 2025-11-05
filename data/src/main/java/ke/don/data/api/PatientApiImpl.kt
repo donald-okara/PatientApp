@@ -59,8 +59,6 @@ class PatientApiImpl(
 
         client.post(Endpoint.Patient.Register.url){
             Authorisation(accessToken = token)
-            // Or using the ktor helper
-            // bearerAuth(token)
             contentType(ContentType.Application.Json)
             setBody(patient)
         }
