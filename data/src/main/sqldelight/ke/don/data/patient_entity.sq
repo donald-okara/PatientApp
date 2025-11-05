@@ -1,0 +1,19 @@
+CREATE TABLE patient_enity (
+    first_name TEXT NOT NULL,
+    second_name TEXT NOT NULL,
+    unique_id TEXT NOT NULL PRIMARY KEY,
+    dob TEXT NOT NULL,
+    gender TEXT NOT NULL,
+    reg_date TEXT NOT NULL
+);
+
+getPatientById:
+SELECT * FROM patient_enity WHERE unique_id = :id
+LIMIT 1;
+
+getAllPatients:
+SELECT * FROM patient_enity;
+
+addOrUpdatePatient:
+INSERT OR REPLACE INTO patient_enity(first_name, second_name, unique_id, dob, gender, reg_date)
+VALUES (:firstName, :secondName, :uniqueId, :dob, :gender, :regDate);

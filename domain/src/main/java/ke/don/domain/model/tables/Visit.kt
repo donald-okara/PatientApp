@@ -1,0 +1,15 @@
+package ke.don.domain.model.tables
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Visit(
+    @SerialName("general_health") val generalHealth: String = "Good",
+    @SerialName("on_diet") val onDiet: String = "Yes",
+    @SerialName("on_drugs") val onDrugs: String = "Yes",
+    @SerialName("comments") val comments: String = "",
+    @SerialName("visit_date") val visitDate: String = "",
+    @SerialName("patient_id") val patientId: String = "",
+    @SerialName("vital_id") val vitalId: String = ""
+)

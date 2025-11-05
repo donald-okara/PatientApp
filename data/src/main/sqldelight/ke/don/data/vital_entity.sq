@@ -1,0 +1,14 @@
+CREATE TABLE vital_entity (
+    visit_date TEXT NOT NULL,
+    height TEXT NOT NULL,
+    weight TEXT NOT NULL,
+    bmi TEXT NOT NULL,
+    patient_id TEXT NOT NULL PRIMARY KEY
+);
+
+registerVital:
+INSERT OR REPLACE INTO vital_entity(visit_date, height, weight, bmi, patient_id)
+VALUES (:visitDate, :height, :weight, :bmi, :patientId);
+
+getVitalByPatient:
+SELECT * FROM vital_entity WHERE patient_id = :id;

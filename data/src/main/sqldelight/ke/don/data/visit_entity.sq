@@ -1,0 +1,17 @@
+CREATE TABLE visit_entity (
+    general_health TEXT NOT NULL,
+    on_diet TEXT NOT NULL,
+    on_drugs TEXT NOT NULL,
+    comments TEXT NOT NULL,
+    visit_date TEXT NOT NULL,
+    vital_id TEXT NOT NULL PRIMARY KEY,
+    patient_id TEXT NOT NULL
+);
+
+registerVisit:
+INSERT OR REPLACE INTO visit_entity(general_health, on_diet, on_drugs, comments, visit_date, vital_id, patient_id)
+VALUES (:generalHealth, :onDiet, :onDrugs, :comments, :visitDate, :vitalId, :patientId);
+
+
+getVisitByVital:
+SELECT * FROM visit_entity WHERE vital_id = :id;
