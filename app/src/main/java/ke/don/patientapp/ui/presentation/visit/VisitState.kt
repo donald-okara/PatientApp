@@ -4,6 +4,7 @@ import ke.don.domain.model.tables.Visit
 
 data class VisitState(
     val visit: Visit = Visit(),
+    val isOverWeight: Boolean = false,
 
     val isLoading: Boolean = false,
     val isError: Boolean = false,

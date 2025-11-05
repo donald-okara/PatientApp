@@ -30,6 +30,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ke.don.domain.model.tables.Visit
 import ke.don.patientapp.ui.presentation.components.ButtonToken
 import ke.don.patientapp.ui.presentation.components.DatePickerTextField
+import ke.don.patientapp.ui.presentation.components.DropdownTextField
 import ke.don.patientapp.ui.presentation.components.OutlinedInputField
 import ke.don.patientapp.ui.presentation.vitals.VitalsIntent
 import ke.don.patientapp.ui.presentation.vitals.VitalsModel
@@ -79,7 +80,11 @@ class VisitForm(private val patientId: String, private val isOverweight: Boolean
             ) {
                 VisitFormContent(
                     state = state,
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    navigateToPatientList = {
+                        navigator.pop()
+                    },
+                    isOverweight = isOverweight
                 )
             }
 
@@ -92,8 +97,7 @@ fun VisitFormContent(
     modifier: Modifier = Modifier,
     state: VisitState,
     onEvent: (VisitIntent) -> Unit,
-    navigateToGeneral: (String) -> Unit,
-    navigateToOverweight: (String) -> Unit,
+    navigateToPatientList: () -> Unit,
     isOverweight: Boolean
 ){
     Column(
@@ -111,42 +115,59 @@ fun VisitFormContent(
             errorMessage = state.visitDateError,
         )
 
-        OutlinedInputField(
-            value = state.vitals.height,
-            onValueChange = { onEvent(VitalsIntent.UpdateHeight(it.toInt())) },
-            label = "Height",
-            placeholder = "Height in cm",
-            error = state.heightError != null,
-            errorMessage = state.heightError,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            singleLine = true
+        DropdownTextField(
+            label = "General health",
+            options = listOf("Good", "Poor"),
+            value = state.visit.generalHealth,
+            onValueChange = { onEvent(VisitIntent.Health(it))},
+            error = state.healthError != null,
+            errorMessage = state.healthError
         )
 
-        OutlinedInputField(
-            value = state.vitals.weight,
-            onValueChange = { onEvent(VitalsIntent.UpdateWeight(it.toInt())) },
-            label = "Weight",
-            placeholder = "Enter weight in kgs",
-            error = state.weightError != null,
-            errorMessage = state.weightError,
-            singleLine = true
-        )
 
-        Text(
-            text = "BMI: ${state.vitals.bmi}",
-            modifier = Modifier.padding(8.dp)
+        if (isOverweight){
+            Text(
+                text = "Have you been on a diet?",
+                modifier = Modifier.padding(8.dp)
+            )
+            DropdownTextField(
+                label = "Answer",
+                options = listOf("Yes", "No"),
+                value = state.visit.onDiet,
+                onValueChange = { onEvent(VisitIntent.Diet(it)) },
+                error = state.dietError != null,
+                errorMessage = state.dietError
+            )
+        } else {
+            Text(
+                text = "Are you currently taking any drugs?",
+                modifier = Modifier.padding(8.dp)
+            )
+            DropdownTextField(
+                label = "Answer",
+                options = listOf("Yes","No"),
+                value = state.visit.onDrugs,
+                onValueChange = { onEvent(VisitIntent.Drugs(it)) },
+                error = state.drugsError != null,
+                errorMessage = state.drugsError
+            )
+        }
+
+        OutlinedInputField(
+            value = state.visit.comments,
+            onValueChange = { onEvent(VisitIntent.Comments(it)) },
+            label = "Comments",
+            error = state.commentsError != null,
+            errorMessage = state.commentsError,
+            singleLine = true
         )
 
         ButtonToken(
             text = "Register",
             onClick = {
                 onEvent(
-                    VitalsIntent.Submit(
-                        navigateToGeneral = navigateToGeneral,
-                        navigateToOverweight = navigateToOverweight
+                    VisitIntent.Submit(
+                        navigateToPatientList
                     )
                 )
             },

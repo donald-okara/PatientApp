@@ -104,7 +104,7 @@ fun PatientListContent(
             ){
                 ButtonToken(
                     text = "Add Patient",
-                    onClick = {navigateToPatientForm},
+                    onClick = navigateToPatientForm,
                 )
             }
         }

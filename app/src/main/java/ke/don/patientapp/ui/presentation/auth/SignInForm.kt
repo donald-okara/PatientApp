@@ -10,6 +10,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,8 +59,11 @@ class SignInForm: Screen {
                     SignInFormContent(
                         state = state,
                         onEvent = onEvent,
+                        navigateToSignUp = {
+                            navigator.push(SignUpForm())
+                        },
                         onNavigateToPatients = {
-                            navigator.push(PatientList())
+                            navigator.replaceAll(PatientList())
                         }
                     )
                 }
@@ -73,7 +77,8 @@ fun SignInFormContent(
     modifier: Modifier = Modifier,
     state: SignInState,
     onEvent: (SignInIntent) -> Unit,
-    onNavigateToPatients: () -> Unit
+    onNavigateToPatients: () -> Unit,
+    navigateToSignUp: () -> Unit
 ){
     Column(
         modifier = modifier
@@ -102,11 +107,18 @@ fun SignInFormContent(
             singleLine = true
         )
 
+        TextButton(
+            onClick = navigateToSignUp,
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text(text = "Sign Up")
+        }
         ButtonToken(
             text = "Sign In",
             onClick = {onEvent(SignInIntent.SignIn(onNavigateToPatients))},
             enabled = !state.isLoading,
-            loading = state.isLoading
+            loading = state.isLoading,
+            errorMessage = state.errorMessage
         )
     }
 }

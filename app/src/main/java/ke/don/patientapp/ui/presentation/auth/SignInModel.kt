@@ -1,9 +1,12 @@
 package ke.don.patientapp.ui.presentation.auth
 
 import android.content.Context
+import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import ke.don.data.local.datastore.AuthorisationStore
 import ke.don.data.local.datastore.setAuthorisation
+import ke.don.domain.model.onError
 import ke.don.domain.model.onSuccess
 import ke.don.domain.repo.PatientApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SignInModel(
-    private val context: Context,
+    private val authorisationStore: AuthorisationStore,
     private val api: PatientApi
 ): ScreenModel{
     private val _uiState = MutableStateFlow(SignInState())
@@ -38,7 +41,7 @@ class SignInModel(
         }
     }
 
-    fun signIn(navigateToPatients: () -> String){
+    fun signIn(navigateToPatients: () -> Unit){
         screenModelScope.launch {
             if (validateFields()){
                 _uiState.update {
@@ -50,8 +53,12 @@ class SignInModel(
                         _uiState.update {
                             it.copy(isLoading = false, isError = false)
                         }
-                        context.setAuthorisation(result)
+                        authorisationStore.save(result)
                         navigateToPatients()
+                    }.onError { error ->
+                        _uiState.update {
+                            it.copy(isLoading = false, isError = true, errorMessage = error.message)
+                        }
                     }
             }
         }

@@ -2,6 +2,7 @@ package ke.don.patientapp.ui.presentation.auth
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import ke.don.domain.model.onError
 import ke.don.domain.model.onSuccess
 import ke.don.domain.repo.PatientApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +67,10 @@ class SignUpModel(
                         it.copy(isLoading = false, isError = false)
                     }
                     navigateToSignIn()
+                }.onError { error ->
+                    _uiState.update {
+                        it.copy(isLoading = false, isError = true, errorMessages = error.message)
+                    }
                 }
             }
         }

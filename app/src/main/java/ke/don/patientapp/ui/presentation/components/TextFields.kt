@@ -199,10 +199,14 @@ fun DatePickerTextField(
             .clickable(enabled = enabled) { showDialog = true },
         readOnly = true,
         trailingIcon = {
-            Icon(
-                imageVector = Icons.Default.CalendarMonth,
-                contentDescription = "Select Date"
-            )
+            IconButton(
+                onClick = { showDialog = !showDialog }
+            ){
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = "Select Date"
+                )
+            }
         }
     )
 

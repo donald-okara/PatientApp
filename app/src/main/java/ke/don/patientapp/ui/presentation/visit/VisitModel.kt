@@ -34,7 +34,7 @@ class VisitModel(
             is VisitIntent.Health -> _uiState.update {
                 it.copy(visit = it.visit.copy(generalHealth = intent.text))
             }
-            is VisitIntent.UpdateId -> updateId(intent.patientId, intent.vitalId)
+            is VisitIntent.UpdateId -> updateId(intent.patientId, intent.vitalId, intent.isOverWeight)
             is VisitIntent.UpdateVisitDate -> _uiState.update {
                 it.copy(visit = it.visit.copy(visitDate = intent.date))
             }
@@ -64,9 +64,10 @@ class VisitModel(
     fun updateId(
         patientId: String,
         vitalId: String,
+        isOverWeight: Boolean
     ){
         _uiState.update {
-            it.copy(visit = it.visit.copy(patientId = patientId, vitalId = vitalId))
+            it.copy(isOverWeight = isOverWeight, visit = it.visit.copy(patientId = patientId, vitalId = vitalId))
         }
         screenModelScope.launch {
             vitalDates = db.getVitalsByPatient(patientId).map { it.visitDate }
@@ -80,8 +81,8 @@ class VisitModel(
             it.copy(
                 visitDateError = if (state.visit.visitDate.isBlank()) "This field is required" else if (state.visit.visitDate !in vitalDates) "This you already have a visit today" else null,
                 healthError = if (state.visit.generalHealth.toInt() > 10) "This field is required" else null,
-                dietError = if (state.visit.onDiet.toInt() > 10) "This field is required" else null,
-                drugsError = if (state.visit.onDrugs.toInt() > 10) "This field is required" else null,
+                dietError = if (state.visit.onDiet.isEmpty() && state.isOverWeight) "This field is required" else null,
+                drugsError = if (state.visit.onDrugs.isEmpty() && !state.isOverWeight) "This field is required" else null,
                 commentsError = if (state.visit.comments.toInt() > 10) "This field is required" else null
             )
         }

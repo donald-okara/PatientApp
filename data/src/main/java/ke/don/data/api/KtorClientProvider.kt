@@ -1,5 +1,6 @@
 package ke.don.data.api
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -7,6 +8,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.plugins.logging.Logger
 import kotlinx.serialization.json.Json
 
 
@@ -39,7 +41,13 @@ internal object KtorClientProvider {
             )
         }
 
+
         install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Log.d("KtorLogger", message)
+                }
+            }
             level = LogLevel.BODY
         }
     }

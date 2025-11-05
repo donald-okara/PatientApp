@@ -5,6 +5,7 @@ import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.reflect.typeInfo
+import ke.don.domain.model.ApiResponse
 import ke.don.domain.model.NetworkError
 import ke.don.domain.model.NetworkErrorCategory
 import ke.don.domain.model.PatientResult
@@ -23,20 +24,24 @@ internal suspend inline fun <reified T> klient(
     val statusCode = response.status.value
 
     if (statusCode in 200..299) {
-        // Pass typeInfo to help Ktor decode lists properly
-        PatientResult.Success(response.body(typeInfo<T>()) as T)
+        val body = response.body<ApiResponse<T>>()
+        if (body.data != null) {
+            PatientResult.Success(body.data)
+        } else {
+            PatientResult.Error(
+                NetworkError(
+                    category = NetworkErrorCategory.SERIALIZATION,
+                    message = "Missing data field",
+                    code = statusCode,
+                )
+            )
+        }
     } else {
         val errorBody = response.bodyAsText()
-        val errorMessage = try {
-            val json = Json.parseToJsonElement(errorBody).jsonObject
-            json["message"]?.jsonPrimitive?.content ?: response.status.description
-        } catch (e: Exception) {
-            response.status.description
-        }
         PatientResult.Error(
             NetworkError(
                 category = statusCode.toCategory(),
-                message = errorMessage,
+                message = errorBody,
                 code = statusCode,
             ),
         )
@@ -50,6 +55,7 @@ internal suspend inline fun <reified T> klient(
         ),
     )
 }
+
 
 /**
  * Converts an HTTP status code to a [NetworkErrorCategory].

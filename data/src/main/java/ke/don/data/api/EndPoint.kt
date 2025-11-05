@@ -16,7 +16,7 @@ internal sealed class Endpoint(val route: String) {
         }
 
     sealed class Auth(route: String) : Endpoint(route) {
-        override val baseUrl = "$BASE_URL/user/"
+        override val baseUrl = "${BASE_URL}user/"
 
         object SignIn : Auth(route = "signin")
 
@@ -24,7 +24,7 @@ internal sealed class Endpoint(val route: String) {
     }
 
     sealed class Patient(route: String) : Endpoint(route) {
-        override val baseUrl = "$BASE_URL/patients/"
+        override val baseUrl = "${BASE_URL}patients/"
 
         object Register : Patient(route = "register")
         object List : Patient(route = "view")
@@ -32,13 +32,13 @@ internal sealed class Endpoint(val route: String) {
     }
 
     sealed class Vitals(route: String) : Endpoint(route) {
-        override val baseUrl = "$BASE_URL/vital/"
+        override val baseUrl = "${BASE_URL}vital/"
 
         object Add : Vitals(route = "add")
     }
 
     sealed class Visit(route: String) : Endpoint(route) {
-        override val baseUrl = "$BASE_URL/visits/"
+        override val baseUrl = "${BASE_URL}visits/"
 
         object Add : Visit(route = "add")
     }

@@ -52,6 +52,7 @@ dependencies {
 
     implementation(libs.bundles.voyager)
     implementation(libs.bundles.koin)
+    implementation(libs.bundles.datastore)
     implementation(libs.bundles.koin.ui)
     implementation(libs.androidx.material.icons.extended)
 

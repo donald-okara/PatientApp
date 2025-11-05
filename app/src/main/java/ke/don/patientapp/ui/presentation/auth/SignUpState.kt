@@ -7,6 +7,7 @@ data class SignUpState (
     val lastname: String = "",
     val isLoading: Boolean = false,
     val isError: Boolean = false,
+    val errorMessages: String? = null,
 
     val firstNameError: String? = null,
     val lastNameError: String? = null,

@@ -106,7 +106,7 @@ fun PatientFormContent(
             errorMessage = state.regDateError,
         )
 
-        PasswordInputField(
+        OutlinedInputField(
             value = state.patient.firstName,
             onValueChange = { onEvent(PatientFormIntent.UpdateFirstName(it)) },
             label = "First name",
