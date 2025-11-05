@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,13 +30,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ke.don.patientapp.ui.presentation.components.ButtonToken
 import ke.don.patientapp.ui.presentation.components.DatePickerTextField
-import ke.don.patientapp.ui.presentation.components.DropdownTextField
 import ke.don.patientapp.ui.presentation.components.OutlinedInputField
-import ke.don.patientapp.ui.presentation.components.PasswordInputField
-import ke.don.patientapp.ui.presentation.patients.PatientFormContent
-import ke.don.patientapp.ui.presentation.patients.PatientFormIntent
-import ke.don.patientapp.ui.presentation.patients.PatientFormModel
-import ke.don.patientapp.ui.presentation.patients.PatientFormState
 import ke.don.patientapp.ui.presentation.visit.VisitForm
 import org.koin.compose.getKoin
 
@@ -134,7 +127,10 @@ fun VitalsFormContent(
 
         OutlinedInputField(
             value = state.vitals.height,
-            onValueChange = { onEvent(VitalsIntent.UpdateHeight(it.toInt())) },
+            onValueChange = {
+                val height = it.toIntOrNull()
+                if (height != null) onEvent(VitalsIntent.UpdateHeight(height))
+            },
             label = "Height",
             placeholder = "Height in cm",
             error = state.heightError != null,
@@ -148,7 +144,10 @@ fun VitalsFormContent(
 
         OutlinedInputField(
             value = state.vitals.weight,
-            onValueChange = { onEvent(VitalsIntent.UpdateWeight(it.toInt())) },
+            onValueChange = {
+                val weight = it.toIntOrNull()
+                if (weight != null) onEvent(VitalsIntent.UpdateWeight(weight))
+            },
             label = "Weight",
             placeholder = "Enter weight in kgs",
             error = state.weightError != null,

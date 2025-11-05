@@ -1,9 +1,13 @@
 package ke.don.data.api
 
+import android.util.Log
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.headers
 import ke.don.data.api.KtorClientProvider.client
 import ke.don.data.helper.klient
 import ke.don.data.local.datastore.AuthorisationStore
@@ -56,9 +60,10 @@ class PatientApiImpl(
 
     override suspend fun registerPatient(patient: Patient): PatientResult<Unit, NetworkError> = klient<Unit>{
         val token = authorisationStore.current().accessToken
+        Log.d("PatientApiImpl", "registerPatient: $token")
 
         client.post(Endpoint.Patient.Register.url){
-            Authorisation(accessToken = token)
+            header(HttpHeaders.Authorization, "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(patient)
         }
@@ -68,7 +73,7 @@ class PatientApiImpl(
         val token = authorisationStore.current().accessToken
 
         client.post(Endpoint.Vitals.Add.url){
-            Authorisation(accessToken = token)
+            header(HttpHeaders.Authorization, "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(vitals)
         }
@@ -78,7 +83,7 @@ class PatientApiImpl(
         val token = authorisationStore.current().accessToken
 
         client.post(Endpoint.Visit.Add.url){
-            Authorisation(accessToken = token)
+            header(HttpHeaders.Authorization, "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(visit)
         }
@@ -88,7 +93,7 @@ class PatientApiImpl(
         val token = authorisationStore.current().accessToken
 
         client.post(Endpoint.Patient.List.url){
-            Authorisation(accessToken = token)
+            header(HttpHeaders.Authorization, "Bearer $token")
             contentType(ContentType.Application.Json)
         }
     }
