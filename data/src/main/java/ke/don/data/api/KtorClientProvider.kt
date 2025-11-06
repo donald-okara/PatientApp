@@ -31,7 +31,6 @@ internal object KtorClientProvider {
         install(ContentNegotiation) {
             json(
                 Json {
-                    encodeDefaults = false
                     explicitNulls = false
                     ignoreUnknownKeys = true
                     prettyPrint = true

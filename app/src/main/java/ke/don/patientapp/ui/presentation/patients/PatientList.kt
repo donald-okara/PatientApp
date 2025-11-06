@@ -99,14 +99,10 @@ fun PatientListContent(
     ) {
 
         item {
-            AnimatedVisibility(
-                visible = state.patients.isEmpty()
-            ){
-                ButtonToken(
-                    text = "Add Patient",
-                    onClick = navigateToPatientForm,
-                )
-            }
+            ButtonToken(
+                text = "Add Patient",
+                onClick = navigateToPatientForm,
+            )
         }
 
         items(state.patients){

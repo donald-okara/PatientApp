@@ -181,13 +181,12 @@ fun DatePickerTextField(
     enabled: Boolean = true,
     error: Boolean = false,
     errorMessage: String? = null,
-    dateFormat: String = "yyyy-MM-dd" // customize this as needed
+    dateFormat: String = "yyyy-MM-dd"
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
     val dateFormatter = remember(dateFormat) { SimpleDateFormat(dateFormat, Locale.getDefault()) }
 
-    // Open the date picker when field is clicked
     OutlinedTextField(
         value = value,
         onValueChange = {},
@@ -199,9 +198,7 @@ fun DatePickerTextField(
             .clickable(enabled = enabled) { showDialog = true },
         readOnly = true,
         trailingIcon = {
-            IconButton(
-                onClick = { showDialog = !showDialog }
-            ){
+            IconButton(onClick = { showDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,
                     contentDescription = "Select Date"
@@ -220,7 +217,9 @@ fun DatePickerTextField(
 
     if (showDialog) {
         val today = remember { Calendar.getInstance() }
-        val selectedDate = remember { Calendar.getInstance() }
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = today.timeInMillis
+        )
 
         DatePickerDialog(
             onDismissRequest = { showDialog = false },
@@ -228,9 +227,14 @@ fun DatePickerTextField(
                 TextButton(
                     onClick = {
                         showDialog = false
-                        onValueChange(dateFormatter.format(selectedDate.time))
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val selectedDate = Calendar.getInstance().apply { timeInMillis = millis }
+                            onValueChange(dateFormatter.format(selectedDate.time))
+                        }
                     }
-                ) { Text("OK") }
+                ) {
+                    Text("OK")
+                }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
@@ -239,9 +243,7 @@ fun DatePickerTextField(
             }
         ) {
             DatePicker(
-                state = rememberDatePickerState(
-                    initialSelectedDateMillis = selectedDate.timeInMillis
-                ),
+                state = datePickerState,
                 showModeToggle = false
             )
         }

@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,13 +33,16 @@ import ke.don.patientapp.ui.presentation.components.ButtonToken
 import ke.don.patientapp.ui.presentation.components.DatePickerTextField
 import ke.don.patientapp.ui.presentation.components.DropdownTextField
 import ke.don.patientapp.ui.presentation.components.OutlinedInputField
+import ke.don.patientapp.ui.presentation.patients.PatientList
 import ke.don.patientapp.ui.presentation.vitals.VitalsIntent
 import ke.don.patientapp.ui.presentation.vitals.VitalsModel
 import ke.don.patientapp.ui.presentation.vitals.VitalsState
 import org.koin.compose.getKoin
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class VisitForm(private val patientId: String, private val isOverweight: Boolean): Screen{
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
     @Composable
     override fun Content() {
 
@@ -51,6 +55,9 @@ class VisitForm(private val patientId: String, private val isOverweight: Boolean
         val state by screenModel.uiState.collectAsState()
         val onEvent = screenModel::handleIntent
 
+        LaunchedEffect(patientId,isOverweight) {
+            onEvent(VisitIntent.UpdateId(patientId, Uuid.random().toString(), isOverweight))
+        }
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -82,7 +89,7 @@ class VisitForm(private val patientId: String, private val isOverweight: Boolean
                     state = state,
                     onEvent = onEvent,
                     navigateToPatientList = {
-                        navigator.pop()
+                        navigator.replaceAll(PatientList())
                     },
                     isOverweight = isOverweight
                 )

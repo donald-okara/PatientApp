@@ -1,5 +1,6 @@
 package ke.don.patientapp.ui.presentation.visit
 
+import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import ke.don.data.local.database.LocalDatabase
@@ -34,7 +35,7 @@ class VisitModel(
             is VisitIntent.Health -> _uiState.update {
                 it.copy(visit = it.visit.copy(generalHealth = intent.text))
             }
-            is VisitIntent.UpdateId -> updateId(intent.patientId, intent.vitalId, intent.isOverWeight)
+            is VisitIntent.UpdateId -> updateId(intent.patientId, intent.isOverWeight)
             is VisitIntent.UpdateVisitDate -> _uiState.update {
                 it.copy(visit = it.visit.copy(visitDate = intent.date))
             }
@@ -46,31 +47,41 @@ class VisitModel(
     fun submit(navigateToPatientList: () -> Unit){
         screenModelScope.launch {
             if (validateFields()) {
-                _uiState.update { it.copy(isLoading = true) }
-
-                api.registerVisit(visit = uiState.value.visit).onSuccess { result ->
-                    _uiState.update { it.copy(isLoading = false, isError = false) }
-                    db.registerVisit(uiState.value.visit)
-                    navigateToPatientList()
-                }.onError { error ->
-                    _uiState.update {
-                        it.copy(isLoading = false, isError = true, errorMessage = error.message)
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoading = true,
+                        visit = it.visit.copy(
+                            onDiet = if (!it.isOverWeight) "Yes" else it.visit.onDiet,
+                            onDrugs = if (it.isOverWeight) "Yes" else it.visit.onDrugs,
+                            //generalHealth = it.visit.generalHealth.ifEmpty { "Good" }
+                        )
+                    )
                 }
+
+                api.registerVisit(visit = uiState.value.visit)
+                    .onSuccess { result ->
+                        _uiState.update { it.copy(isLoading = false, isError = false) }
+                        db.registerVisit(uiState.value.visit)
+                        navigateToPatientList()
+                    }.onError { error ->
+                        _uiState.update {
+                            it.copy(isLoading = false, isError = true, errorMessage = error.message)
+                        }
+                    }
             }
         }
     }
 
     fun updateId(
         patientId: String,
-        vitalId: String,
-        isOverWeight: Boolean
-    ){
+        isOverWeight: Boolean,
+    ) {
+        vitalDates = db.getVitalsByPatient(patientId).map { it.visitDate }
         _uiState.update {
-            it.copy(isOverWeight = isOverWeight, visit = it.visit.copy(patientId = patientId, vitalId = vitalId))
-        }
-        screenModelScope.launch {
-            vitalDates = db.getVitalsByPatient(patientId).map { it.visitDate }
+            it.copy(
+                isOverWeight = isOverWeight,
+                visit = it.visit.copy(patientId = patientId, vitalId = (vitalDates.size + 1).toString())
+            )
         }
     }
 
@@ -79,11 +90,11 @@ class VisitModel(
 
         _uiState.update {
             it.copy(
-                visitDateError = if (state.visit.visitDate.isBlank()) "This field is required" else if (state.visit.visitDate !in vitalDates) "This you already have a visit today" else null,
-                healthError = if (state.visit.generalHealth.toInt() > 10) "This field is required" else null,
+                visitDateError = if (state.visit.visitDate.isBlank()) "This field is required" else if (vitalDates.contains(state.visit.visitDate)) "This you already have a visit on this day" else null,
+                healthError = if (state.visit.generalHealth.isEmpty()) "This field is required" else null,
                 dietError = if (state.visit.onDiet.isEmpty() && state.isOverWeight) "This field is required" else null,
                 drugsError = if (state.visit.onDrugs.isEmpty() && !state.isOverWeight) "This field is required" else null,
-                commentsError = if (state.visit.comments.toInt() > 10) "This field is required" else null
+                commentsError = if (state.visit.comments.isEmpty()) "This field is required" else null
             )
         }
         // After updating errors, check if any of them are not null

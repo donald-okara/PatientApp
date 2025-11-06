@@ -152,6 +152,10 @@ fun VitalsFormContent(
             placeholder = "Enter weight in kgs",
             error = state.weightError != null,
             errorMessage = state.weightError,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
             singleLine = true
         )
 

@@ -12,6 +12,8 @@ import ke.don.domain.model.PatientResult
 import kotlinx.io.IOException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.SocketTimeoutException
@@ -38,12 +40,34 @@ internal suspend inline fun <reified T> klient(
         }
     } else {
         val errorBody = response.bodyAsText()
+        val json = try {
+            Json.parseToJsonElement(errorBody).jsonObject
+        } catch (_: Exception) {
+            null
+        }
+
+        val message = when {
+            json == null -> errorBody
+            "errors" in json -> {
+                val errors = json["errors"]!!.jsonObject
+                buildString {
+                    json["message"]?.jsonPrimitive?.contentOrNull?.let { appendLine(it) }
+                    errors.forEach { (field, msgs) ->
+                        val joined = msgs.jsonArray.joinToString("; ") { it.jsonPrimitive.content }
+                        appendLine("$field: $joined")
+                    }
+                }.trim()
+            }
+            "message" in json -> json["message"]!!.jsonPrimitive.content
+            else -> errorBody
+        }
+
         PatientResult.Error(
             NetworkError(
                 category = statusCode.toCategory(),
-                message = errorBody,
+                message = "$statusCode: $message",
                 code = statusCode,
-            ),
+            )
         )
     }
 } catch (e: Exception) {
@@ -55,6 +79,7 @@ internal suspend inline fun <reified T> klient(
         ),
     )
 }
+
 
 
 /**

@@ -20,13 +20,18 @@ class PatientListModel(
 
     fun handleIntent(intent: PatientListIntent){
         when(intent){
-            is PatientListIntent.FetchPatients -> {}
+            is PatientListIntent.FetchPatients -> fetchPatients()
         }
     }
 
     fun fetchPatients(){
         screenModelScope.launch {
-            db.getPatients()
+            val patientList = db.getPatients()
+            _uiState.update {
+                it.copy(
+                    patients = patientList
+                )
+            }
         }
     }
 }

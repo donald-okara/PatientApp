@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.round
 
 class VitalsModel(
     private val api: PatientApi,
@@ -28,14 +29,7 @@ class VitalsModel(
             is VitalsIntent.UpdateVisitDate -> _uiState.update {
                 it.copy(vitals = it.vitals.copy(visitDate = intent.date))
             }
-            is VitalsIntent.UpdateWeight -> _uiState.update {
-                it.copy(
-                    vitals = it.vitals.copy(
-                        weight = intent.weight.toString(),
-                        bmi = (intent.weight / (it.vitals.height.toInt() * it.vitals.height.toInt())).toString()
-                    )
-                )
-            }
+            is VitalsIntent.UpdateWeight -> updateWeight(intent.weight)
         }
     }
 
@@ -73,24 +67,45 @@ class VitalsModel(
         }
     }
 
-    fun updateHeight(height: Int){
-        val heightInMeters = height/100
+    fun updateHeight(height: Int) {
+        val heightInMeters = height / 100.0
         _uiState.update {
+            val weight = it.vitals.weight.toDoubleOrNull() ?: 0.0
+            val bmiValue = if (heightInMeters > 0) weight / (heightInMeters * heightInMeters) else 0.0
+            val bmi = round(bmiValue).toInt() // round to nearest integer
+
             it.copy(
                 vitals = it.vitals.copy(
-                    height = heightInMeters.toString(),
-                    bmi = (it.vitals.weight.toInt() / (heightInMeters * heightInMeters)).toString()
+                    height = height.toString(),
+                    bmi = bmi.toString()
                 )
             )
         }
     }
+
+    fun updateWeight(weight: Int) {
+        _uiState.update {
+            val height = it.vitals.height.toDoubleOrNull() ?: 0.0
+            val heightInMeters = height / 100.0
+            val bmiValue = if (heightInMeters > 0) weight / (heightInMeters * heightInMeters) else 0.0
+            val bmi = round(bmiValue).toInt()
+
+            it.copy(
+                vitals = it.vitals.copy(
+                    weight = weight.toString(),
+                    bmi = bmi.toString()
+                )
+            )
+        }
+    }
+
     fun validateFields(): Boolean {
         val state = uiState.value
         _uiState.update {
             it.copy(
-                visitDateError = if (state.vitals.visitDate.isBlank()) "Visit date is required" else null,
-                heightError = if (state.vitals.height.toInt() > 10) "height has to be more than 10" else null,
-                weightError = if (state.vitals.weight.toInt() > 10) "weight has to be more than 10" else null,
+                visitDateError = if (state.vitals.visitDate.isBlank()) "Visit date is required" else if (visitDates.contains(state.vitals.visitDate))"You already have an assessment on this day" else null,
+                heightError = if (state.vitals.height.toInt() <= 1 ) "height has to be more than 1" else null,
+                weightError = if (state.vitals.weight.toInt() <= 1 ) "weight has to be more than 1" else null,
             )
         }
 

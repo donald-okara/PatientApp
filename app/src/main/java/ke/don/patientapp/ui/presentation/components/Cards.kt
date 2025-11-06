@@ -23,7 +23,7 @@ fun PatientCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    ElevatedCard(
+    Card(
         onClick = { onClick?.invoke() },
         enabled = onClick != null,
         modifier = modifier
@@ -36,7 +36,7 @@ fun PatientCard(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             // Avatar placeholder
             Box(
