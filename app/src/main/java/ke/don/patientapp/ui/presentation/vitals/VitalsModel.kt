@@ -53,7 +53,7 @@ class VitalsModel(
                 api.registerVitals(vitals = uiState.value.vitals).onSuccess { result ->
                     _uiState.update { it.copy(isLoading = false, isError = false) }
                     db.registerVitals(uiState.value.vitals)
-                    if (uiState.value.vitals.bmi.toInt() <= 25){
+                    if (uiState.value.vitals.bmi.toInt() < 25){
                         navigateToGeneral(uiState.value.vitals.patientId)
                     } else {
                         navigateToOverweight(uiState.value.vitals.patientId)
